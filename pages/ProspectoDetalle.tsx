@@ -5,8 +5,7 @@ import { useAppContext } from '../context/AppContext';
 import { generarEmail } from '../services/geminiService';
 import type { ClientePotencial, Servicio, LlamadaRegistrada } from '../types';
 import { Spinner } from '../components/Spinner';
-import { useGoogleAuth } from '../context/GoogleAuthContext';
-import { createGmailDraft } from '../services/gmailService';
+import { useGmailDraft } from '../hooks/useGmailDraft';
 
 // --- Helper Components defined in-file for simplicity ---
 
@@ -70,9 +69,7 @@ const EmailModal: React.FC<{
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [isCopied, setIsCopied] = useState(false);
-  const { isGoogleSignedIn, signIn, isReady } = useGoogleAuth();
-  const [draftStatus, setDraftStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [draftMessage, setDraftMessage] = useState('');
+  const { createDraft, status: draftStatus, message: draftMessage, isReady, isGoogleSignedIn } = useGmailDraft();
 
   const handleGenerateEmail = async () => {
     setIsLoading(true);
@@ -105,29 +102,11 @@ const EmailModal: React.FC<{
   };
 
   const handleCreateDraft = async () => {
-    if (!isGoogleSignedIn) {
-        signIn();
-        return;
-    }
-    setDraftStatus('loading');
-    setDraftMessage('');
-    try {
-        await createGmailDraft({
-            to: cliente.contacto.email,
-            subject: emailContent.asunto,
-            body: emailContent.cuerpo,
-        });
-        setDraftStatus('success');
-        setDraftMessage('¡Borrador creado en Gmail!');
-    } catch (err) {
-        setDraftStatus('error');
-        setDraftMessage(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-        setTimeout(() => {
-            setDraftStatus('idle');
-            setDraftMessage('');
-        }, 4000);
-    }
+    createDraft({
+        to: cliente.contacto.email,
+        subject: emailContent.asunto,
+        body: emailContent.cuerpo,
+    });
   };
 
   React.useEffect(() => {
@@ -137,8 +116,6 @@ const EmailModal: React.FC<{
         setError('');
         setIsLoading(false);
         setIsCopied(false);
-        setDraftStatus('idle');
-        setDraftMessage('');
     }
   }, [isOpen]);
 
@@ -200,7 +177,7 @@ const EmailModal: React.FC<{
               {emailContent.cuerpo && !isLoading && (
                   <button 
                     onClick={handleCreateDraft} 
-                    disabled={draftStatus === 'loading' || (!isGoogleSignedIn && !isReady)} 
+                    disabled={draftStatus === 'loading' || !isReady} 
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
                     title={!isReady && !isGoogleSignedIn ? "Inicializando sistema de Google..." : "Crear un borrador de este email en tu cuenta de Gmail"}
                   >
