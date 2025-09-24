@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -11,7 +12,7 @@ export const Header: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const { isGoogleSignedIn, signIn, signOut } = useGoogleAuth();
+  const { isGoogleSignedIn, signIn, signOut, isReady, error } = useGoogleAuth();
 
   const isProspectosActive = location.pathname.startsWith('/prospecto') || location.pathname === '/prospectos';
 
@@ -36,6 +37,28 @@ export const Header: React.FC = () => {
         return name.substring(0, 2).toUpperCase();
     }
     return name.toUpperCase();
+  };
+
+  const renderGmailButton = () => {
+    if (isGoogleSignedIn) {
+      return (
+        <button onClick={signOut} className="px-3 py-1.5 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700 mr-4">
+            Desconectar Google
+        </button>
+      );
+    }
+    if (error) {
+        return (
+            <div className="flex items-center mr-4" title={error}>
+                 <span className="text-sm text-red-500">Error en Google</span>
+            </div>
+        );
+    }
+    return (
+      <button onClick={signIn} disabled={!isReady} className="px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-wait mr-4">
+          {isReady ? 'Conectar Gmail' : 'Cargando...'}
+      </button>
+    );
   };
 
 
@@ -64,15 +87,7 @@ export const Header: React.FC = () => {
             <div className="ml-4 flex items-center md:ml-6">
               {user && (
                  <>
-                   {isGoogleSignedIn ? (
-                      <button onClick={signOut} className="px-3 py-1.5 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700 mr-4">
-                        Desconectar Google
-                      </button>
-                  ) : (
-                      <button onClick={signIn} className="px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 mr-4">
-                        Conectar Gmail
-                      </button>
-                  )}
+                   {renderGmailButton()}
                    <span className="text-gray-600 dark:text-gray-300 text-sm mr-3">Hola, {user.nombre}</span>
                    <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center font-bold text-white text-sm mr-4" title={user.email}>
                      {getInitials(user.nombre)}

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import type { EmailGenerado } from '../types';
@@ -8,7 +9,7 @@ const EmailCard: React.FC<{ email: EmailGenerado; isSelected: boolean; onSelect:
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const { asunto, cuerpo } = JSON.parse(email.cuerpo);
-  const { isGoogleSignedIn, signIn } = useGoogleAuth();
+  const { isGoogleSignedIn, signIn, isReady } = useGoogleAuth();
   const [draftStatus, setDraftStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [draftMessage, setDraftMessage] = useState('');
 
@@ -117,8 +118,9 @@ const EmailCard: React.FC<{ email: EmailGenerado; isSelected: boolean; onSelect:
                 )}
                 <button 
                     onClick={handleCreateDraft}
-                    disabled={draftStatus === 'loading'}
+                    disabled={draftStatus === 'loading' || (!isGoogleSignedIn && !isReady)}
                     className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-400 flex items-center"
+                    title={!isReady && !isGoogleSignedIn ? "Inicializando sistema de Google..." : "Crear un borrador de este email en tu cuenta de Gmail"}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                   {draftStatus === 'loading' ? 'Creando...' : 'Crear Borrador en Gmail'}
