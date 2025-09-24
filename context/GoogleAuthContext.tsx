@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import { useAppContext } from './AppContext';
 
@@ -20,6 +19,24 @@ interface GoogleAuthContextType {
 const GoogleAuthContext = createContext<GoogleAuthContextType | undefined>(undefined);
 
 const GMAIL_SCOPE = 'https://www.googleapis.com/auth/gmail.compose';
+
+const parseGoogleError = (tokenResponse: any): string => {
+    console.error("Google auth error:", tokenResponse);
+    switch (tokenResponse.error) {
+        case 'invalid_client':
+        case 'invalid_request':
+            return "Error de Configuración (invalid_client): Revisa que tu 'Google Client ID' sea correcto y que el tipo de credencial en Google Cloud sea 'Aplicación web'. Además, asegúrate de haber añadido 'https://aistudio.google.com' a los orígenes autorizados.";
+        case 'unauthorized_client':
+            return "Cliente no autorizado. Asegúrate de que el ID de cliente esté habilitado para usar las APIs de Google que solicitas.";
+        case 'access_denied':
+            return "Acceso denegado. Has rechazado el permiso para que la aplicación acceda a tu cuenta de Gmail.";
+        case 'redirect_uri_mismatch':
+        case 'origin_mismatch':
+            return "Error de Configuración (origin_mismatch): Debes añadir 'https://aistudio.google.com' a la lista de 'Orígenes de JavaScript autorizados' Y a la lista de 'URIs de redireccionamiento autorizados' en la configuración de tus credenciales en la Consola de Google Cloud.";
+        default:
+            return `Error de Google: ${tokenResponse.error_description || tokenResponse.error}. Por favor, revisa tu configuración.`;
+    }
+};
 
 export const GoogleAuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { googleClientId } = useAppContext();
@@ -66,7 +83,7 @@ export const GoogleAuthProvider: React.FC<{ children: ReactNode }> = ({ children
           setError(null);
         } catch (err: any) {
           console.error("Error initializing GAPI client:", err);
-          setError("No se pudo inicializar el cliente de Google. Revisa la consola.");
+          setError("Fallo al inicializar GAPI. Esto puede deberse a un problema con la API Key o la configuración de red. Revisa la consola del navegador para ver el error detallado de Google.");
         }
       };
       initializeGapiClient();
@@ -82,8 +99,7 @@ export const GoogleAuthProvider: React.FC<{ children: ReactNode }> = ({ children
             scope: GMAIL_SCOPE,
             callback: (tokenResponse: any) => {
                 if (tokenResponse.error) {
-                    console.error("Google auth error:", tokenResponse);
-                    setError(`Error de autenticación: ${tokenResponse.error_description || tokenResponse.error}`);
+                    setError(parseGoogleError(tokenResponse));
                     setIsGoogleSignedIn(false);
                     return;
                 }
@@ -97,7 +113,7 @@ export const GoogleAuthProvider: React.FC<{ children: ReactNode }> = ({ children
         setTokenClient(client);
       } catch (err: any) {
         console.error("Error initializing GIS client:", err);
-        setError("No se pudo inicializar el sistema de autenticación de Google.");
+        setError("No se pudo inicializar el sistema de autenticación de Google. Verifica tu Client ID.");
       }
     }
   }, [gisLoaded, googleClientId]);
