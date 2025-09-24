@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import type { PerfilUsuario, Servicio, EmailGenerado, ClientePotencial, LlamadaRegistrada } from '../types';
 
