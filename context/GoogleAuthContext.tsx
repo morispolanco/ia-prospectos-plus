@@ -72,27 +72,28 @@ export const GoogleAuthProvider: React.FC<{ children: ReactNode }> = ({ children
 
   // Effect for initializing GAPI client (loads Gmail API definition)
   useEffect(() => {
-    if (gapiLoaded && googleClientId && process.env.API_KEY) {
+    if (gapiLoaded && googleClientId) {
       const initializeGapiClient = async () => {
         try {
           await window.gapi.client.init({
-            apiKey: process.env.API_KEY,
+            // API key is not used for GAPI client init; auth is handled by OAuth.
             discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest'],
           });
           setGapiClientReady(true);
           setError(null);
         } catch (err: any) {
           console.error("Error initializing GAPI client:", err);
-          let detailedError = "Fallo al inicializar la conexión con Google. ";
+          let detailedError;
           if (err.result && err.result.error) {
               const googleError = err.result.error;
               if (googleError.status === 'PERMISSION_DENIED' || googleError.code === 403) {
-                  detailedError = "Error de Permiso de API (403): Asegúrate de que la 'Gmail API' esté habilitada en tu proyecto de Google Cloud. También verifica que tu API Key no tenga restricciones de referrer que bloqueen a 'https://aistudio.google.com'.";
+                  detailedError = "Error de Permiso (403): La API de Gmail no está habilitada en tu proyecto de Google Cloud. Por favor, ve a la consola de Google Cloud, busca 'Gmail API' y habilítala para tu proyecto.";
               } else {
-                  detailedError += `Error de Google: ${googleError.message} (Código: ${googleError.code}). Revisa tu configuración.`;
+                  detailedError = `Fallo al inicializar GAPI: ${googleError.message} (Código: ${googleError.code}). Revisa la configuración de tu proyecto.`;
               }
           } else {
-              detailedError += "Esto puede deberse a un problema con la API Key o la configuración de red. Revisa la consola del navegador para ver el error detallado de Google.";
+              // This generic path is often hit if the Gmail API is not enabled.
+              detailedError = "Fallo al inicializar el cliente de Gmail. La causa más común es que la 'Gmail API' no está habilitada en tu proyecto de Google Cloud. Por favor, ve a tu consola de Google, busca y habilita la 'Gmail API'. Si ya está habilitada, podría ser un problema de red.";
           }
           setError(detailedError);
         }
