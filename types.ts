@@ -20,6 +20,7 @@ export interface ClientePotencial {
     cargo: string;
     email: string;
     telefono: string;
+    emailVerificado: boolean;
   };
   ubicacion: string;
   sector: string;

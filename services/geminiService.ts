@@ -20,15 +20,16 @@ export const buscarClientes = async (servicio: Servicio, sector: string, ubicaci
         - La dirección completa de la oficina principal.
         - Una calificación promedio y el número de reseñas (si están disponibles en fuentes como Google Maps). Si no hay, usa 0.
     3.  BÚSQUEDA DE CONTACTOS: Para encontrar los contactos más relevantes y actuales, busca en múltiples fuentes, no solo LinkedIn. Considera Google Maps, redes sociales de la empresa, y directorios profesionales (ej: colegios de abogados, médicos, etc.). El objetivo es encontrar a la persona con mayor probabilidad de contratar el servicio. IMPORTANTE: Ignora y descarta cualquier correo electrónico que comience con 'info'.
-    4.  ORDEN: Ordena el resultado final de mayor a menor 'probabilidadContratacion'.
-    5.  FORMATO DE SALIDA: Tu respuesta DEBE ser EXCLUSIVAMENTE un array JSON válido. No añadas texto introductorio, explicaciones, ni marcadores de código como \`\`\`json. La respuesta debe empezar con '[' y terminar con ']'.
+    4.  VERIFICACIÓN DE EMAIL: Intenta verificar la validez del email. Si lo encuentras en una fuente oficial (página 'Sobre nosotros', 'Equipo', etc.), marca 'emailVerificado' como true. Si es una suposición basada en patrones (ej: nombre.apellido@empresa.com) y no lo encuentras explícitamente, márcalo como false. Esto es crucial para la calidad de los datos.
+    5.  ORDEN: Ordena el resultado final de mayor a menor 'probabilidadContratacion'.
+    6.  FORMATO DE SALIDA: Tu respuesta DEBE ser EXCLUSIVAMENTE un array JSON válido. No añadas texto introductorio, explicaciones, ni marcadores de código como \`\`\`json. La respuesta debe empezar con '[' y terminar con ']'.
 
     La estructura de cada objeto JSON debe ser:
     {
       "id": "string (un UUID v4 único para cada prospecto)",
       "nombreEmpresa": "string",
       "paginaWeb": "string",
-      "contacto": { "nombre": "string", "cargo": "string", "email": "string", "telefono": "string" },
+      "contacto": { "nombre": "string", "cargo": "string", "email": "string", "telefono": "string", "emailVerificado": "boolean" },
       "ubicacion": "string (ciudad/país, ej: '${ubicacion}')",
       "sector": "string (ej: '${sector}')",
       "direccionCompleta": "string",
