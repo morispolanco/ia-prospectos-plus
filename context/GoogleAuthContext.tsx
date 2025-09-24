@@ -83,7 +83,18 @@ export const GoogleAuthProvider: React.FC<{ children: ReactNode }> = ({ children
           setError(null);
         } catch (err: any) {
           console.error("Error initializing GAPI client:", err);
-          setError("Fallo al inicializar GAPI. Esto puede deberse a un problema con la API Key o la configuración de red. Revisa la consola del navegador para ver el error detallado de Google.");
+          let detailedError = "Fallo al inicializar la conexión con Google. ";
+          if (err.result && err.result.error) {
+              const googleError = err.result.error;
+              if (googleError.status === 'PERMISSION_DENIED' || googleError.code === 403) {
+                  detailedError = "Error de Permiso de API (403): Asegúrate de que la 'Gmail API' esté habilitada en tu proyecto de Google Cloud. También verifica que tu API Key no tenga restricciones de referrer que bloqueen a 'https://aistudio.google.com'.";
+              } else {
+                  detailedError += `Error de Google: ${googleError.message} (Código: ${googleError.code}). Revisa tu configuración.`;
+              }
+          } else {
+              detailedError += "Esto puede deberse a un problema con la API Key o la configuración de red. Revisa la consola del navegador para ver el error detallado de Google.";
+          }
+          setError(detailedError);
         }
       };
       initializeGapiClient();
