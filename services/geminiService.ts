@@ -78,6 +78,8 @@ export const buscarClientes = async (servicio: Servicio, sector: string, ubicaci
 export const generarEmail = async (cliente: ClientePotencial, servicio: Servicio, perfil: PerfilUsuario): Promise<string> => {
   try {
     const systemInstruction = "Eres una API de redacción de correos. Tu única función es devolver un objeto JSON con las claves 'asunto' y 'cuerpo'. Nunca escribas nada fuera del objeto JSON.";
+    
+    const paginaWebParaFirma = servicio.paginaWeb || perfil.paginaWeb;
 
     const prompt = `
     Tu tarea es redactar un borrador de correo electrónico B2B altamente personalizado en español.
@@ -96,7 +98,7 @@ export const generarEmail = async (cliente: ClientePotencial, servicio: Servicio
     **Información del remitente (mi perfil):**
     - Nombre: ${perfil.nombre}
     - Email: ${perfil.email}
-    - Web: ${perfil.paginaWeb}
+    - Web: ${paginaWebParaFirma}
     - Mi servicio: ${servicio.nombre}
     - Descripción del servicio: ${servicio.descripcion}
 
@@ -110,7 +112,7 @@ export const generarEmail = async (cliente: ClientePotencial, servicio: Servicio
         -   Despedida y Firma: Finaliza el correo con "Atentamente,". Justo debajo, DEBES incluir la siguiente firma, con cada elemento en una nueva línea:
             ${perfil.nombre}
             ${perfil.email}
-            ${perfil.paginaWeb}
+            ${paginaWebParaFirma}
     
     **FORMATO DE SALIDA OBLIGATORIO:**
     Tu respuesta DEBE ser EXCLUSIVAMENTE un objeto JSON válido. No incluyas texto, explicaciones o marcadores de formato. La respuesta debe empezar con '{' y terminar con '}'.

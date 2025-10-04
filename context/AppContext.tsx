@@ -12,6 +12,7 @@ interface AppContextType {
   setGoogleClientId: (id: string) => void;
   setPerfil: (perfil: PerfilUsuario) => void;
   addServicio: (servicio: Omit<Servicio, 'id'>) => void;
+  updateServicio: (servicio: Servicio) => void;
   removeServicio: (id: string) => void;
   addEmail: (email: Omit<EmailGenerado, 'id' | 'fecha'>) => void;
   removeEmails: (emailIds: string[]) => void;
@@ -86,6 +87,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setServicios(prev => [...prev, newServicio]);
   };
 
+  const updateServicio = (updatedServicio: Servicio) => {
+    setServicios(prev => prev.map(s => (s.id === updatedServicio.id ? updatedServicio : s)));
+  };
+
   const removeServicio = (id: string) => {
     setServicios(prev => prev.filter(s => s.id !== id));
   };
@@ -139,7 +144,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   return (
-    <AppContext.Provider value={{ perfil, setPerfil, servicios, addServicio, removeServicio, emails, addEmail, removeEmails, prospectos, addProspectos, removeProspectos, getProspectoById, llamadas, addLlamada, googleClientId, setGoogleClientId }}>
+    <AppContext.Provider value={{ perfil, setPerfil, servicios, addServicio, updateServicio, removeServicio, emails, addEmail, removeEmails, prospectos, addProspectos, removeProspectos, getProspectoById, llamadas, addLlamada, googleClientId, setGoogleClientId }}>
       {children}
     </AppContext.Provider>
   );

@@ -9,6 +9,7 @@ export interface Servicio {
   id: string;
   nombre: string;
   descripcion: string;
+  paginaWeb?: string;
 }
 
 export interface ClientePotencial {
